@@ -7,6 +7,15 @@ from sensor_msgs.msg import Imu
 
 prev_time = None
 
+def quaternion_multiply(q1, q2):
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+    x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+    y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+    z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
+    return [w, x, y, z]
+
 def calculate_inertial_odometry(msg):
     global prev_time, prev_vel, prev_pos
     current_time = rospy.Time.now()
@@ -19,19 +28,16 @@ def calculate_inertial_odometry(msg):
 
     # Get orientation and angular velocity from IMU
     current_quat = [msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]
+    current_quat_conj = [-msg.orientation.x, -msg.orientation.y, -msg.orientation.z, msg.orientation.w]
     angular_vel = msg.angular_velocity
 
     # Extract the linear acceleration from the IMU msg
     linear_accel = [msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z]
 
     # Compensate for gravity based on the orientation
-    g = 9.81  # gravitational constant
-    rotation_matrix = [
-        [1 - 2 * (current_quat[2] * 2 + current_quat[3] * 2), 2 * (current_quat[1] * current_quat[2] - current_quat[3] * current_quat[0]), 2 * (current_quat[1] * current_quat[3] + current_quat[2] * current_quat[0])],
-        [2 * (current_quat[1] * current_quat[2] + current_quat[3] * current_quat[0]), 1 - 2 * (current_quat[1] * 2 + current_quat[3] * 2), 2 * (current_quat[2] * current_quat[3] - current_quat[1] * current_quat[0])],
-        [2 * (current_quat[1] * current_quat[3] - current_quat[2] * current_quat[0]), 2 * (current_quat[2] * current_quat[3] + current_quat[1] * current_quat[0]), 1 - 2 * (current_quat[1] * 2 + current_quat[2] * 2)]
-    ]
-    gravity_compensation = [rotation_matrix[i][2] * g for i in range(3)]
+    g = [0, 0, 9.81, 0]
+    gravity_compensation = quaternion_multiply(quaternion_multiply(current_quat, g), current_quat_conj)
+
     linear_accel = [linear_accel[i] - gravity_compensation[i] for i in range(3)]
 
     # Calculate current position and velocity using inertial navigation equations
@@ -42,9 +48,6 @@ def calculate_inertial_odometry(msg):
     prev_time = current_time
     prev_vel = current_vel
     prev_pos = current_pos
-    
-    rospy.loginfo("current_pos")
-    rospy.loginfo(msg.linear_acceleration_covariance)
 
     # Create a PoseStamped message to represent the odometry
     odometry = PoseStamped()
