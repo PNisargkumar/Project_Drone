@@ -248,7 +248,6 @@ if __name__ == "__main__":
     try:
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
-        rospy.loginfo("Camera opened")
     # Check if camera opened successfully
     except rospy.ROSInterruptException:
         rospy.loginfo("Error opening video stream")
@@ -305,7 +304,7 @@ if __name__ == "__main__":
         odometry.pose.orientation.y = cur_quat[1]
         odometry.pose.orientation.z = cur_quat[2]
         odometry.pose.orientation.w = cur_quat[3]
-        
+        vo_pub.publish(odometry)
 
     # When everything done, release the video capture object
     cap.release()
