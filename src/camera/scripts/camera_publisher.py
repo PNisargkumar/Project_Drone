@@ -19,7 +19,7 @@ else:
 bridge = CvBridge()
 
 def img_publisher():
-    pub = rospy.Publisher('/camera', Image, queue_size=1)
+    pub = rospy.Publisher('/camera/image', Image, queue_size=1)
     rospy.init_node('my_camera')
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():

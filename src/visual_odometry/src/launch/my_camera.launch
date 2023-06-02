@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<!-- Our node to launch camera node -->
-	<node pkg="visual_odometry" type="camera_node.py" name="my_camera" required="true" output="screen" />
-</launch>

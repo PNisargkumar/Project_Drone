@@ -3,7 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from mavros_msgs.msg import State
-from mavros_msgs.srv import CommandBool, CommandBoolRequest, SetMode, SetModeRequest
+from mavros_msgs.srv import CommandBool, CommandBoolRequest, SetMode, SetModeRequest ,CommandHome, CommandHomeRequest
 
 current_state = State()
 
@@ -18,6 +18,16 @@ if __name__ == "__main__":
     state_sub = rospy.Subscriber("mavros/state", State, callback = state_cb)
 
     local_pos_pub = rospy.Publisher("mavros/setpoint_position/local", PoseStamped, queue_size=10)
+
+    rospy.wait_for_message("/mavros/vision_pose/pose", PoseStamped, timeout = 5)
+    try: 
+        rospy.wait_for_service('/mavros/cmd/set_home')
+        set_home = rospy.ServiceProxy('/mavros/cmd/set_home',CommandHome)
+        request = CommandHomeRequest()
+        set_home(request)
+        rospy.loginfo("Home position set successfull!")
+    except rospy.ServiceException as e:
+        rospy.logerr("Failed to set home position: %s" %e)
 
     rospy.wait_for_service("/mavros/cmd/arming")
     arming_client = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)
@@ -37,7 +47,7 @@ if __name__ == "__main__":
 
     pose.pose.position.x = 0
     pose.pose.position.y = 0
-    pose.pose.position.z = 2
+    pose.pose.position.z = .2
 
     # Send a few setpoints before starting
     for i in range(100):
