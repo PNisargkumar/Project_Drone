@@ -3,6 +3,7 @@
 import rospy
 import numpy as np
 import cv2
+import time
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
@@ -183,6 +184,7 @@ def image_callback(new_image):
     global old_frame
     global new_frame
     global bridge
+    global odometry
 
     new_frame = bridge.imgmsg_to_cv2(new_image, "bgr8")
 
@@ -192,10 +194,8 @@ def image_callback(new_image):
             if (len(q1) > 20 and len(q2) > 20) and (q1.all() == q2.all()):
                 transf = vo.get_pose(q1, q2)
                 cur_pose = np.dot(cur_pose,transf)
-                odometry = PoseStamped()
-                current_time = rospy.Time.now()
                 odometry.header = Header()
-                odometry.header.stamp = current_time
+                odometry.header.stamp = rospy.Time.now()
                 odometry.header.frame_id = "base_link"
                 odometry.pose.position.x = cur_pose[0,3]/100
                 odometry.pose.position.y = cur_pose[1,3]/100
@@ -225,6 +225,6 @@ if __name__ == "__main__":
     old_frame = None
     new_frame = None
     cur_pose = start_pose
-
+    odometry = PoseStamped()
     while not rospy.is_shutdown():
         rospy.spin()
