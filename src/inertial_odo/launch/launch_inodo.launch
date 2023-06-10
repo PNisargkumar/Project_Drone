@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="inertial_odo" type="inertial_odo_publisher.py" name="inertial_odometry_node" required="true" output="screen" />
+</launch>
+

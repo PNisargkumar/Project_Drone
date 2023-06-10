@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="optical_flow" type="optical_flow_publisher.py" name="optical_flow_node" required="true" output="screen" />
+</launch>

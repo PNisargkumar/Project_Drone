@@ -45,9 +45,9 @@ if __name__ == "__main__":
 
     pose = PoseStamped()
 
-    pose.pose.position.x = 0
-    pose.pose.position.y = 0
-    pose.pose.position.z = .2
+    pose.pose.position.x = 0.2
+    pose.pose.position.y = 0.2
+    pose.pose.position.z = 0.1
 
     # Send a few setpoints before starting
     for i in range(100):
@@ -66,8 +66,9 @@ if __name__ == "__main__":
     last_req = rospy.Time.now()
 
     while(not rospy.is_shutdown()):
-        while(current_state.mode == "MANUAL"):
+        while(current_state.mode == "MANUAL") and not rospy.is_shutdown():
             local_pos_pub.publish(pose)
+            rospy.loginfo("waiting for OFFBOARD")
             rate.sleep()
 
         if(current_state.mode != "OFFBOARD" and (rospy.Time.now() - last_req) > rospy.Duration(5.0)):
