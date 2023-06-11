@@ -211,7 +211,8 @@ def image_callback(new_image):
 
 if __name__ == "__main__":
 
-    intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+    intrinsic = np.array([[629.39855957, 0, 329.88459537], [0, 627.90997314, 229.05112011], [0, 0, 1]])
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
     vo_pub = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=10)
