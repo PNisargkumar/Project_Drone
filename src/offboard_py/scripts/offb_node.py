@@ -14,7 +14,7 @@ def state_cb(msg):
 
 if __name__ == "__main__":
     rospy.init_node("offb_node_py")
-
+    rospy.sleep(2)
     state_sub = rospy.Subscriber("mavros/state", State, callback = state_cb)
 
     local_pos_pub = rospy.Publisher("mavros/setpoint_position/local", PoseStamped, queue_size=10)
@@ -45,8 +45,8 @@ if __name__ == "__main__":
 
     pose = PoseStamped()
 
-    pose.pose.position.x = 0.2
-    pose.pose.position.y = 0.2
+    pose.pose.position.x = 0
+    pose.pose.position.y = 0
     pose.pose.position.z = 0.1
 
     # Send a few setpoints before starting

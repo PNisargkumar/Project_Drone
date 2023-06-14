@@ -102,7 +102,7 @@ def image_callback(new_image):
     
 
 if __name__ == "__main__":
-    intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
     rospy.init_node("optical_flow_node")
     optflow_pub = rospy.Publisher("/mavros/px4flow/raw/optical_flow_rad", OpticalFlowRad, queue_size=10)
     image_sub = rospy.Subscriber("/camera/image", Image, image_callback)

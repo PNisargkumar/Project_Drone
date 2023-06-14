@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<!--include file="$(find camera)/launch/camera.launch"/-->
+	<node pkg="aruco" type="aruco_location_publisher.py" name="aruco_tracker_node" required="true" output="screen" />
+</launch>
