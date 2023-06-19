@@ -6,6 +6,7 @@
 	<!--include file="$(find px4)/launch/mavros_posix_sitl.launch"/-->
 	<include file="$(find visual_odometry)/launch/launch_visodo.launch"/>
 	<include file="$(find optical_flow)/launch/launch_optical_flow.launch"/>
+	<include file="$(find sonic_sensor)/launch/sonic_sensor.launch"/>
 
 	<!-- Our node to control the drone -->
 	<node pkg="offboard_py" type="offb_node.py" name="offb_node_py" required="true" output="screen" />
