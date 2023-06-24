@@ -2,7 +2,8 @@
 
 import rospy
 from sensor_msgs.msg import Range
-
+from std_msgs.msg import Header
+from geometry_msgs.msg import PoseStamped
 import smbus
 import time
 
@@ -17,24 +18,27 @@ def read_distance():
 
 def srf10_reader():
     rospy.init_node('srf10_reader', anonymous=True)
-    pub = rospy.Publisher('mavros/px4flow/ground_distance', Range, queue_size=10)
-
-    rate = rospy.Rate(10)  # 10 Hz
-
+    pub_range = rospy.Publisher('mavros/px4flow/ground_distance', Range, queue_size=10)
+    pub_pose = rospy.Publisher('', PoseStamped, queue_size=10)
     while not rospy.is_shutdown():
         distance = read_distance()
-        rospy.loginfo("Distance: {} cm".format(distance))
-
+        #rospy.loginfo("Distance: {} cm".format(distance))
         range_msg = Range()
+        range_msg.header = Header()
         range_msg.header.stamp = rospy.Time.now()
+        range_msg.header.frame_id = "sonic_sensor"
         range_msg.radiation_type = Range.ULTRASOUND
-        range_msg.field_of_view = 0.1
-        range_msg.min_range = 0.006
-        range_msg.max_range = 2.0
+        range_msg.field_of_view = 0.523599
+        range_msg.min_range = 0.003
+        range_msg.max_range = 6.0
         range_msg.range = distance / 100.0  # Convert distance from cm to meters
-
-        pub.publish(range_msg)
-        rate.sleep()
+        pub_range.publish(range_msg)
+        pose = PoseStamped()
+        pose.header = Header()
+        pose.header.stamp = rospy.get_rostime()
+        pose.header.frame_id = "sonic_sensor"
+        pose.pose.position.z = distance / 100
+        pub_pose.publish(pose)
 
 if __name__ == '__main__':
     try:

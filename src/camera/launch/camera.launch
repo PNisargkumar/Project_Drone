@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+    <node pkg="tf" type="static_transform_publisher" name= "base_link_to_camera_tf" args="1 2 3 0 0 0 base_link camera 10"/>
 	<!-- Our node to launch camera node -->
 	<node pkg="camera" type="camera_publisher.py" name="camera_publisher_node" required="true" output="screen" />
 </launch>

@@ -28,7 +28,8 @@ bridge = CvBridge()
 new_frame = None
 old_frame = None
 opticalflow = OpticalFlowRad()
-intrinsic = np.array([[629.39855957, 0, 329.88459537], [0, 627.90997314, 229.05112011], [0, 0, 1]])
+intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+#intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
 
 def image_callback(new_image):
     start = time.time()
@@ -102,7 +103,7 @@ def image_callback(new_image):
     
 
 if __name__ == "__main__":
-    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+
     rospy.init_node("optical_flow_node")
     optflow_pub = rospy.Publisher("/mavros/px4flow/raw/optical_flow_rad", OpticalFlowRad, queue_size=10)
     image_sub = rospy.Subscriber("/camera/image", Image, image_callback)

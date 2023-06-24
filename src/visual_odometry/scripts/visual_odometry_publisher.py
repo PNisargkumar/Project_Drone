@@ -195,8 +195,8 @@ def image_callback(new_image):
                 transf = vo.get_pose(q1, q2)
                 cur_pose = np.dot(cur_pose,transf)
                 odometry.header = Header()
-                odometry.header.stamp = rospy.Time.now()
-                odometry.header.frame_id = "base_link"
+                odometry.header.stamp = rospy.get_rostime()
+                odometry.header.frame_id = "camera"
                 odometry.pose.position.x = cur_pose[0,3]/100
                 odometry.pose.position.y = cur_pose[1,3]/100
                 odometry.pose.position.z = cur_pose[2,3]/100
@@ -210,12 +210,11 @@ def image_callback(new_image):
     process_frames = True
 
 if __name__ == "__main__":
-
-    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
-    intrinsic = np.array([[629.39855957, 0, 329.88459537], [0, 627.90997314, 229.05112011], [0, 0, 1]])
+    #intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+    intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
-    vo_pub = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=10)
+    vo_pub = rospy.Publisher("/visual_odometry", PoseStamped, queue_size=10)
     image_sub = rospy.Subscriber("/camera/image", Image, image_callback)
     bridge = CvBridge()
     start_pose = np.ones((3,4))
