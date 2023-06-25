@@ -6,7 +6,7 @@ import cv2
 import time
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from std_msgs.msg import Header
 
 class VisualOdometry():
@@ -197,24 +197,24 @@ def image_callback(new_image):
                 odometry.header = Header()
                 odometry.header.stamp = rospy.get_rostime()
                 odometry.header.frame_id = "camera"
-                odometry.pose.position.x = cur_pose[0,3]/100
-                odometry.pose.position.y = cur_pose[1,3]/100
-                odometry.pose.position.z = cur_pose[2,3]/100
+                odometry.pose.pose.position.x = cur_pose[0,3]/100
+                odometry.pose.pose.position.y = cur_pose[1,3]/100
+                odometry.pose.pose.position.z = cur_pose[2,3]/100
                 cur_quat = matrix_to_quaternion(cur_pose[:, 0:3])
-                odometry.pose.orientation.x = cur_quat[0]
-                odometry.pose.orientation.y = cur_quat[1]
-                odometry.pose.orientation.z = cur_quat[2]
-                odometry.pose.orientation.w = cur_quat[3]
+                odometry.pose.pose.orientation.x = cur_quat[0]
+                odometry.pose.pose.orientation.y = cur_quat[1]
+                odometry.pose.pose.orientation.z = cur_quat[2]
+                odometry.pose.pose.orientation.w = cur_quat[3]
                 vo_pub.publish(odometry)
     old_frame = new_frame
     process_frames = True
 
 if __name__ == "__main__":
-    #intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
-    intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+    intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
-    vo_pub = rospy.Publisher("/visual_odometry", PoseStamped, queue_size=10)
+    vo_pub = rospy.Publisher("/visual_odometry", PoseWithCovarianceStamped, queue_size=10)
     image_sub = rospy.Subscriber("/camera/image", Image, image_callback)
     bridge = CvBridge()
     start_pose = np.ones((3,4))
@@ -225,6 +225,6 @@ if __name__ == "__main__":
     old_frame = None
     new_frame = None
     cur_pose = start_pose
-    odometry = PoseStamped()
+    odometry = PoseWithCovarianceStamped()
     while not rospy.is_shutdown():
         rospy.spin()

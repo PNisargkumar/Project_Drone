@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- Include the MAVROS node with SITL and Gazebo -->
+	<include file="$(find camera)/launch/camera.launch"/>
+	<!--include file="$(find px4)/launch/mavros_posix_sitl.launch"/-->
+	<include file="$(find visual_odometry)/launch/launch_visodo.launch"/>
+    <include file="$(find odometry)/launch/start_filter.launch"/>
+</launch>
