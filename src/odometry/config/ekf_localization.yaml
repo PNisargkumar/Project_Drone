@@ -149,7 +149,7 @@ pose0_queue_size: 5
 pose0_rejection_threshold: 2  # Note the difference in parameter name
 pose0_nodelay: false
 
-pose1: mavros/px4flow/ground_distance
+pose1: sonic_sensor
 pose1_config: [false,  false,  true,
                false, false, false,
                false, false, false,
