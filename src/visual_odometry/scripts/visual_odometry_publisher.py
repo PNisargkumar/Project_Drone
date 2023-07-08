@@ -187,6 +187,7 @@ def image_callback(new_image):
     global odometry
 
     new_frame = bridge.imgmsg_to_cv2(new_image, "bgr8")
+    new_frame = cv2.flip(new_frame,1)
 
     if process_frames:
         q1, q2 = vo.get_matches(old_frame, new_frame)
@@ -212,6 +213,7 @@ def image_callback(new_image):
 if __name__ == "__main__":
     intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
     #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
+    #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
     vo_pub = rospy.Publisher("/visual_odometry", PoseWithCovarianceStamped, queue_size=10)
