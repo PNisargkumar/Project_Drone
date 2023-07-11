@@ -82,6 +82,6 @@ if __name__ == '__main__':
     # Assuming you have created a publisher for the inertial odometry
     inertial_odom_pub = rospy.Publisher('/inertial_odom', PoseStamped, queue_size=10)
 
-    rate = rospy.Rate(20)  # 10 Hz update rate (adjust as needed)
+    rate = rospy.Rate(20)  # 20 Hz update rate (adjust as needed)
 
     rospy.spin()

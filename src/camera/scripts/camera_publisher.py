@@ -21,7 +21,7 @@ bridge = CvBridge()
 def img_publisher():
     pub = rospy.Publisher('/camera/image', Image, queue_size=1)
     rospy.init_node('my_camera')
-    rate = rospy.Rate(30)
+    rate = rospy.Rate(15)
     rospy.loginfo("camera resolution: "+ str(cap.get(3)) + "x"+ str(cap.get(4)))
     while not rospy.is_shutdown():
         ret, frame = cap.read()
