@@ -147,33 +147,11 @@ class VisualOdometry():
         return [R1, t]
 
 def matrix_to_quaternion(matrix):
-    trace = matrix[0, 0] + matrix[1, 1] + matrix[2, 2]
-    
-    if trace > 0:
-        S = np.sqrt(trace + 1.0) * 2.0
-        qw = 0.25 * S
-        qx = (matrix[2, 1] - matrix[1, 2]) / S
-        qy = (matrix[0, 2] - matrix[2, 0]) / S
-        qz = (matrix[1, 0] - matrix[0, 1]) / S
-    elif matrix[0, 0] > matrix[1, 1] and matrix[0, 0] > matrix[2, 2]:
-        S = np.sqrt(1.0 + matrix[0, 0] - matrix[1, 1] - matrix[2, 2]) * 2.0
-        qw = (matrix[2, 1] - matrix[1, 2]) / S
-        qx = 0.25 * S
-        qy = (matrix[0, 1] + matrix[1, 0]) / S
-        qz = (matrix[0, 2] + matrix[2, 0]) / S
-    elif matrix[1, 1] > matrix[2, 2]:
-        S = np.sqrt(1.0 + matrix[1, 1] - matrix[0, 0] - matrix[2, 2]) * 2.0
-        qw = (matrix[0, 2] - matrix[2, 0]) / S
-        qx = (matrix[0, 1] + matrix[1, 0]) / S
-        qy = 0.25 * S
-        qz = (matrix[1, 2] + matrix[2, 1]) / S
-    else:
-        S = np.sqrt(1.0 + matrix[2, 2] - matrix[0, 0] - matrix[1, 1]) * 2.0
-        qw = (matrix[1, 0] - matrix[0, 1]) / S
-        qx = (matrix[0, 2] + matrix[2, 0]) / S
-        qy = (matrix[1, 2] + matrix[2, 1]) / S
-        qz = 0.25 * S
-
+    rvec, _ = cv2.Rodrigues(matrix[:3, :3])
+    qx = np.sin(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) - np.cos(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
+    qy = np.cos(rvec[0]/2) * np.sin(rvec[1]/2) * np.cos(rvec[2]/2) + np.sin(rvec[0]/2) * np.cos(rvec[1]/2) * np.sin(rvec[2]/2)
+    qz = np.cos(rvec[0]/2) * np.cos(rvec[1]/2) * np.sin(rvec[2]/2) - np.sin(rvec[0]/2) * np.sin(rvec[1]/2) * np.cos(rvec[2]/2)
+    qw = np.cos(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) + np.sin(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
     return np.array([qx, qy, qz, qw])
 
 def image_callback(new_image):
@@ -212,7 +190,6 @@ def image_callback(new_image):
 
 if __name__ == "__main__":
     intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
-    #intrinsic = np.load('/home/zeelpatel/Desktop/intrinsicNew.npy')
     #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
