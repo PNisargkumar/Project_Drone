@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from std_msgs.msg import Header
 
 tag42 = np.array(((1,0,0,0),
@@ -96,16 +96,16 @@ def image_callback(new_image):
     drone_position = np.mean( np.array(calc_position_drone), axis=0 )
     if len(calc_position_drone) > 0:
         rquat = matrix_to_quaternion(drone_position[:3, :3])
-        dronePose = PoseStamped()
+        dronePose = PoseWithCovarianceStamped()
         dronePose.header = Header()
         dronePose.header.frame_id = "camera"
-        dronePose.pose.position.x = drone_position[0,3]
-        dronePose.pose.position.y = drone_position[1,3]
-        dronePose.pose.position.z = drone_position[2,3]
-        dronePose.pose.orientation.x = rquat[0]
-        dronePose.pose.orientation.y = rquat[1]
-        dronePose.pose.orientation.z = rquat[2]
-        dronePose.pose.orientation.w = rquat[3]
+        dronePose.pose.pose.position.x = drone_position[0,3]
+        dronePose.pose.pose.position.y = drone_position[1,3]
+        dronePose.pose.pose.position.z = drone_position[2,3]
+        dronePose.pose.pose.orientation.x = rquat[0]
+        dronePose.pose.pose.orientation.y = rquat[1]
+        dronePose.pose.pose.orientation.z = rquat[2]
+        dronePose.pose.pose.orientation.w = rquat[3]
         aruco_pub.publish(dronePose)
 
 
@@ -113,7 +113,7 @@ def image_callback(new_image):
 if __name__ == "__main__":
     
     rospy.init_node("aruco_tracker_node")
-    aruco_pub = rospy.Publisher("/drone/aruco/pose", PoseStamped, queue_size=10)
+    aruco_pub = rospy.Publisher("/drone/aruco/pose", PoseWithCovarianceStamped, queue_size=10)
     image_sub = rospy.Subscriber("/camera/image", Image, image_callback)
     while not rospy.is_shutdown():
         rospy.spin()
