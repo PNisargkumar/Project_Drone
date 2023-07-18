@@ -6,7 +6,6 @@ import cv2
 import time
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-#from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 
@@ -188,8 +187,8 @@ def image_callback(new_image):
     process_frames = True
 
 if __name__ == "__main__":
-    #intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
-    intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
+    intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+    #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
     vo_pub = rospy.Publisher("drone/visual_odometry", Odometry, queue_size=10)

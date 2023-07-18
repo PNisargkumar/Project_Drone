@@ -41,10 +41,10 @@ aruco_params = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, aruco_params)
 bridge = CvBridge()
 
-#intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_r.npy')
-#distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_r.npy')
-intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_l.npy')
-distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_l.npy')
+intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_r.npy')
+distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_r.npy')
+#intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_l.npy')
+#distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_l.npy')
 aruco_Points = np.zeros((4,1,3), dtype=np.float32)
 aruco_Points[0][0] = [-aruco_size/2, -aruco_size/2,0]
 aruco_Points[1][0] = [aruco_size/2, -aruco_size/2,0]
