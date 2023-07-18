@@ -6,7 +6,8 @@ import cv2
 import time
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseWithCovarianceStamped
+#from geometry_msgs.msg import PoseWithCovarianceStamped
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 
 class VisualOdometry():
@@ -35,9 +36,6 @@ class VisualOdometry():
         
         return T
 
-    def get_world_points(self):
-        return np.array(self.world_points)
-    
     def get_matches(self, img1, img2):
    
         # Find the keypoints and descriptors with ORB
@@ -172,13 +170,14 @@ def image_callback(new_image):
         if q1 is not None:
             if (len(q1) > 20 and len(q2) > 20) and (q1.all() == q2.all()):
                 transf = vo.get_pose(q1, q2)
-                cur_pose = np.dot(cur_pose,transf)
+                #cur_pose = np.dot(cur_pose,transf)
                 odometry.header = Header()
                 odometry.header.stamp = rospy.get_rostime()
-                odometry.header.frame_id = "camera"
-                odometry.pose.pose.position.x = cur_pose[0,3]/100
-                odometry.pose.pose.position.y = cur_pose[1,3]/100
-                odometry.pose.pose.position.z = cur_pose[2,3]/100
+                odometry.header.frame_id = "odom"
+                odometry.child_frame_id = "camera"
+                odometry.pose.pose.position.x = transf[0,3]/100
+                odometry.pose.pose.position.y = transf[1,3]/100
+                odometry.pose.pose.position.z = transf[2,3]/100
                 cur_quat = matrix_to_quaternion(cur_pose[:, 0:3])
                 odometry.pose.pose.orientation.x = cur_quat[0]
                 odometry.pose.pose.orientation.y = cur_quat[1]
@@ -189,21 +188,17 @@ def image_callback(new_image):
     process_frames = True
 
 if __name__ == "__main__":
-    intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
-    #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
+    #intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+    intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
-    vo_pub = rospy.Publisher("/visual_odometry", PoseWithCovarianceStamped, queue_size=10)
-    image_sub = rospy.Subscriber("/camera/image", Image, image_callback)
+    vo_pub = rospy.Publisher("drone/visual_odometry", Odometry, queue_size=10)
+    image_sub = rospy.Subscriber("drone/camera/image", Image, image_callback)
     bridge = CvBridge()
-    start_pose = np.ones((3,4))
-    start_translation = np.zeros((3,1))
-    start_rotation = np.identity(3)
-    start_pose = np.concatenate((start_rotation, start_translation), axis=1)
     process_frames = False
     old_frame = None
     new_frame = None
-    cur_pose = start_pose
-    odometry = PoseWithCovarianceStamped()
+    cur_pose = np.identity(4)
+    odometry = Odometry()
     while not rospy.is_shutdown():
         rospy.spin()

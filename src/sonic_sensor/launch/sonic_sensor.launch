@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="tf" type="static_transform_publisher" name= "base_link_to_sonic_sensor" args="1 2 3 0 0 0 base_link sonic_sensor 10"/>
+    <node pkg="tf" type="static_transform_publisher" name= "base_link_to_sonic_sensor" args="1 2 3 0 0 0 base_link sonic_sensor 1000"/>
 	<!-- Our node to launch sonic sensor node -->
 	<node pkg="sonic_sensor" type="sonic_sensor.py" name="sonic_sensor_node" required="true" output="screen" />
 </launch>

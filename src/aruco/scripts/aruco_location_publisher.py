@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 
 tag42 = np.array(((1,0,0,0),
@@ -41,15 +41,20 @@ aruco_params = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, aruco_params)
 bridge = CvBridge()
 
-intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_r.npy')
-distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_r.npy')
-#intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_l.npy')
-#distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_l.npy')
+#intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_r.npy')
+#distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_r.npy')
+intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_l.npy')
+distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_l.npy')
 aruco_Points = np.zeros((4,1,3), dtype=np.float32)
 aruco_Points[0][0] = [-aruco_size/2, -aruco_size/2,0]
 aruco_Points[1][0] = [aruco_size/2, -aruco_size/2,0]
 aruco_Points[2][0] = [aruco_size/2, aruco_size/2,0]
 aruco_Points[3][0] = [-aruco_size/2, aruco_size/2,0]
+
+z_rot_mat = np.array(((np.cos(-np.pi/2),np.sin(-np.pi/2),0,0),
+                 (-np.sin(-np.pi/2),np.cos(-np.pi/2),0,0),
+                 (0,0,1,0),
+                 (0,0,0,1)))
 
 def matrix_to_quaternion(matrix):
     rvec, _ = cv2.Rodrigues(matrix[:3, :3])
@@ -93,14 +98,16 @@ def image_callback(new_image):
                 aruco_index = aruco_IDs.index(marker_IDs[i])
                 position = combine_poses(hmat, aruco_loc[aruco_index])
                 calc_position_drone.append(position)      
-    drone_position = np.mean( np.array(calc_position_drone), axis=0 )
     if len(calc_position_drone) > 0:
+        drone_position = np.mean( np.array(calc_position_drone), axis=0 )
         rquat = matrix_to_quaternion(drone_position[:3, :3])
-        dronePose = PoseWithCovarianceStamped()
+        dronePose = Odometry()
         dronePose.header = Header()
-        dronePose.header.frame_id = "camera"
-        dronePose.pose.pose.position.x = drone_position[0,3]
-        dronePose.pose.pose.position.y = drone_position[1,3]
+        dronePose.header.stamp = rospy.Time.now()
+        dronePose.header.frame_id = "odom"
+        dronePose.child_frame_id = "camera"
+        dronePose.pose.pose.position.x = drone_position[1,3]
+        dronePose.pose.pose.position.y = -drone_position[0,3]
         dronePose.pose.pose.position.z = drone_position[2,3]
         dronePose.pose.pose.orientation.x = rquat[0]
         dronePose.pose.pose.orientation.y = rquat[1]
@@ -113,7 +120,7 @@ def image_callback(new_image):
 if __name__ == "__main__":
     
     rospy.init_node("aruco_tracker_node")
-    aruco_pub = rospy.Publisher("/drone/aruco/pose", PoseWithCovarianceStamped, queue_size=10)
-    image_sub = rospy.Subscriber("/camera/image", Image, image_callback)
+    aruco_pub = rospy.Publisher("/drone/aruco", Odometry, queue_size=10)
+    image_sub = rospy.Subscriber("/drone/camera/image", Image, image_callback)
     while not rospy.is_shutdown():
         rospy.spin()
