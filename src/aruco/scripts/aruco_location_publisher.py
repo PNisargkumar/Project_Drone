@@ -33,8 +33,28 @@ tag46 = np.array(((1,0,0,0),
                  (0,0,1,0),
                  (0,0,0,1)))
 
-aruco_IDs = [42,43,44,45,46]
-aruco_loc = [tag42,tag43,tag44,tag45,tag46]
+tag47 = np.array(((1,0,0,0.67),
+                 (0,1,0,-0.65),
+                 (0,0,1,0),
+                 (0,0,0,1)))
+
+tag48 = np.array(((1,0,0,-0.67),
+                 (0,1,0,-0.65),
+                 (0,0,1,0),
+                 (0,0,0,1)))
+
+tag49 = np.array(((1,0,0,-0.67),
+                 (0,1,0,0.65),
+                 (0,0,1,0),
+                 (0,0,0,1)))
+
+tag50 = np.array(((1,0,0,0.67),
+                 (0,1,0,0.65),
+                 (0,0,1,0),
+                 (0,0,0,1)))
+
+aruco_IDs = [42,43,44,45,46,47,48,49,50]
+aruco_loc = [tag42,tag43,tag44,tag45,tag46,tag47,tag48,tag49,tag50]
 aruco_size = 0.1
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_7X7_100)
 aruco_params = cv2.aruco.DetectorParameters()
