@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="remap" type="remap.py" name="Odom_to_pose" required="true" output="screen" />
+</launch>
