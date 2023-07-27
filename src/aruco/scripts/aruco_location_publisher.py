@@ -55,7 +55,7 @@ tag50 = np.array(((1,0,0,0.67),
 
 aruco_IDs = [42,43,44,45,46,47,48,49,50]
 aruco_loc = [tag42,tag43,tag44,tag45,tag46,tag47,tag48,tag49,tag50]
-aruco_size = 0.1
+aruco_size = 0.1 # in meters
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_7X7_100)
 aruco_params = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, aruco_params)
@@ -71,13 +71,9 @@ aruco_Points[1][0] = [aruco_size/2, -aruco_size/2,0]
 aruco_Points[2][0] = [aruco_size/2, aruco_size/2,0]
 aruco_Points[3][0] = [-aruco_size/2, aruco_size/2,0]
 
-z_rot_mat = np.array(((np.cos(-np.pi/2),np.sin(-np.pi/2),0,0),
-                 (-np.sin(-np.pi/2),np.cos(-np.pi/2),0,0),
-                 (0,0,1,0),
-                 (0,0,0,1)))
-
 def matrix_to_quaternion(matrix):
     rvec, _ = cv2.Rodrigues(matrix[:3, :3])
+    rvec[0] = -rvec[0]
     qx = np.sin(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) - np.cos(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
     qy = np.cos(rvec[0]/2) * np.sin(rvec[1]/2) * np.cos(rvec[2]/2) + np.sin(rvec[0]/2) * np.cos(rvec[1]/2) * np.sin(rvec[2]/2)
     qz = np.cos(rvec[0]/2) * np.cos(rvec[1]/2) * np.sin(rvec[2]/2) - np.sin(rvec[0]/2) * np.sin(rvec[1]/2) * np.cos(rvec[2]/2)
@@ -126,8 +122,8 @@ def image_callback(new_image):
         dronePose.header.stamp = rospy.Time.now()
         dronePose.header.frame_id = "odom"
         dronePose.child_frame_id = "camera"
-        dronePose.pose.pose.position.x = drone_position[1,3]
-        dronePose.pose.pose.position.y = -drone_position[0,3]
+        dronePose.pose.pose.position.x = -drone_position[0,3]
+        dronePose.pose.pose.position.y = drone_position[1,3]
         dronePose.pose.pose.position.z = drone_position[2,3]
         dronePose.pose.pose.orientation.x = rquat[0]
         dronePose.pose.pose.orientation.y = rquat[1]
