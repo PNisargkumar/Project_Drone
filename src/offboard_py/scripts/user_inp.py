@@ -35,21 +35,12 @@ def state_cb(msg):
 if __name__ == "__main__":
     rospy.init_node("user")
     
-    state_sub = rospy.Subscriber("mavros/state", State, callback = state_cb)
-    rospy.wait_for_message("mavros/state", State)
-    
     user_pos_pub = rospy.Publisher("user_inp", PoseStamped, queue_size = 10)
    
     # Setpoint publishing MUST be faster than 2Hz
     rate = rospy.Rate(20)
-    
-    while(current_state.mode != "OFFBOARD" and current_state.armed != True):
-        rospy.loginfo("Waiting for ARMING and OFFBOARD mode")
-        rate.sleep()
-    rospy.loginfo("ARMED and OFFBOARD mode set")
-    rate.sleep()
 
-    while(not rospy.is_shutdown() and exit != True and current_state.mode == "OFFBOARD"):
+    while(not rospy.is_shutdown() and exit==False):
         rospy.loginfo("\nEnter 't' to takeoff \nEnter 'g' to go to setpoint \nEnter 'l' to land \nEnter 'q' to quit\n")
         cmd = input("Command: ")
         if cmd == "t":

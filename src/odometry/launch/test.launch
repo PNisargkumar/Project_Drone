@@ -7,4 +7,5 @@
 	<include file="$(find aruco)/launch/launch_aruco_tracking.launch"/>
 	<include file="$(find sonic_sensor)/launch/sonic_sensor.launch"/>
     <include file="$(find odometry)/launch/start_filter.launch"/>
+	<include file="$(find remap)/launch/remap.launch"/>
 </launch>

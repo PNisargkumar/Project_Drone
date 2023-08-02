@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="offboard_py" type="user_inp.py" name="user" required="true" output="screen" />
+  <node pkg="offboard_py" type="offb_node1.py" name="offb" required="true" output="screen" />
 </launch>
