@@ -151,6 +151,12 @@ def matrix_to_quaternion(matrix):
     qw = np.cos(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) + np.sin(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
     return np.array([qx, qy, qz, qw])
 
+def undistort_image(image, camera_matrix, dist_coeffs):
+    h, w = image.shape[:2]
+    new_cam_mat, roi= cv2.getOptimalNewCameraMatrix(camera_matrix, dist_coeffs,(w,h),1,(w,h))
+    undistorted_image = cv2.undistort(image,camera_matrix,dist_coeffs,None,new_cam_mat)
+    return undistorted_image
+
 def image_callback(new_image):
     global vo_pub
     global vo
@@ -162,6 +168,7 @@ def image_callback(new_image):
     global odometry
 
     new_frame = bridge.imgmsg_to_cv2(new_image, "bgr8")
+    new_frame = undistort_image(new_frame, intrinsic, distortion)
     new_frame = cv2.flip(new_frame,1)
 
     if process_frames:
@@ -188,7 +195,9 @@ def image_callback(new_image):
 
 if __name__ == "__main__":
     intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
+    distortion = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/dist_coeffs_r.npy')
     #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
+    #distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_r.npy')
     vo = VisualOdometry(intrinsic)
     rospy.init_node("visual_odometry_node")
     vo_pub = rospy.Publisher("drone/visual_odometry", Odometry, queue_size=10)

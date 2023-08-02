@@ -61,10 +61,10 @@ aruco_params = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, aruco_params)
 bridge = CvBridge()
 
-intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_r.npy')
-distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_r.npy')
-#intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_l.npy')
-#distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_l.npy')
+intrinsic = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/camera_matrix_wideangle.npy')
+distortion = np.load('/home/ubuntu/Project_drone/src/aruco/scripts/dist_coeffs_wideangle.npy')
+#intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_wideangle.npy')
+#distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_wideangle.npy')
 aruco_Points = np.zeros((4,1,3), dtype=np.float32)
 aruco_Points[0][0] = [-aruco_size/2, -aruco_size/2,0]
 aruco_Points[1][0] = [aruco_size/2, -aruco_size/2,0]
@@ -100,9 +100,15 @@ def combine_poses(camera_pose, object_pose):
     combined_pose[:3, 3] = combined_translation
     return combined_pose
 
+def undistort_image(image, camera_matrix, dist_coeffs):
+    h, w = image.shape[:2]
+    new_cam_mat, roi= cv2.getOptimalNewCameraMatrix(camera_matrix, dist_coeffs,(w,h),1,(w,h))
+    undistorted_image = cv2.undistort(image,camera_matrix,dist_coeffs,None,new_cam_mat)
+    return undistorted_image
 
 def image_callback(new_image):
     new_frame = new_frame = bridge.imgmsg_to_cv2(new_image, "mono8")
+    new_frame = undistort_image(new_frame, intrinsic, distortion)
     marker_corners, marker_IDs, reject = detector.detectMarkers(new_frame)
     calc_position_drone = []
     if len(marker_corners) > 0:
