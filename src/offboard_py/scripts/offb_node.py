@@ -54,7 +54,7 @@ if __name__ == "__main__":
     arm_cmd.value = True
 
     while(not rospy.is_shutdown()):
-        if(current_state.mode == "OFFBOARD" and current_state.armed): 
+        if(current_state.mode != "OFFBOARD" and current_state.armed): 
             rospy.loginfo("Vehicle armed and OFFBOARD enabled")
         else:
             rospy.loginfo("Arm vehicle and enable OFFBOARD")

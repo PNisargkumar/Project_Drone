@@ -11,8 +11,8 @@ def remapping(odo):
     drone_pose.header = Header()
     drone_pose.header.stamp = rospy.get_rostime()
     drone_pose.header.frame_id = "base_link"
-    drone_pose.pose.position.x = odo.pose.pose.position.x
-    drone_pose.pose.position.y = odo.pose.pose.position.y
+    drone_pose.pose.position.x = odo.pose.pose.position.y
+    drone_pose.pose.position.y = -odo.pose.pose.position.x
     drone_pose.pose.position.z = odo.pose.pose.position.z
     drone_pose.pose.orientation.x = odo.pose.pose.orientation.x
     drone_pose.pose.orientation.y = odo.pose.pose.orientation.y
