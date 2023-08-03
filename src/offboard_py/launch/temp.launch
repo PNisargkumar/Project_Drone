@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node pkg="offboard_py" type="offb_node1.py" name="offb" required="true" output="screen" />
-</launch>

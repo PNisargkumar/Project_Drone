@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+	<include file="$(find camera)/launch/camera.launch"/>	
+	<include file="$(find mavros)/launch/px4.launch"/>
+	<include file="$(find visual_odometry)/launch/launch_visodo.launch"/>
+	<include file="$(find aruco)/launch/launch_aruco_tracking.launch"/>
+	<include file="$(find sonic_sensor)/launch/sonic_sensor.launch"/>
+	<include file="$(find odometry)/launch/start_filter.launch"/>
+	<include file="$(find remap)/launch/remap.launch"/>
+	<node pkg="offboard_py" type="offb_node1.py" name="offb_node_py" required="true" output="screen" />
+</launch>
