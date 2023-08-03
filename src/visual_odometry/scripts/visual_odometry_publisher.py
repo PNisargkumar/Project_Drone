@@ -168,7 +168,7 @@ def image_callback(new_image):
     global odometry
 
     new_frame = bridge.imgmsg_to_cv2(new_image, "bgr8")
-    new_frame = undistort_image(new_frame, intrinsic, distortion)
+    #new_frame = undistort_image(new_frame, intrinsic, distortion)
     new_frame = cv2.flip(new_frame,1)
 
     if process_frames:
