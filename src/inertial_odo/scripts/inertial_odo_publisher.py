@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
+# Import necessary ROS libraries and messages
 import rospy
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Header
 from sensor_msgs.msg import Imu
 
+# Initialize global variables to keep track of time, position, and velocity
 prev_time = None
+prev_pos = [0.0, 0.0, 0.0]
+prev_vel = [0.0, 0.0, 0.0]
 
+# Function to perform quaternion multiplication
 def quaternion_multiply(q1, q2):
     w1, x1, y1, z1 = q1
     w2, x2, y2, z2 = q2
@@ -16,6 +21,7 @@ def quaternion_multiply(q1, q2):
     z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
     return [w, x, y, z]
 
+# Function to calculate inertial odometry
 def calculate_inertial_odometry(msg):
     global prev_time, prev_vel, prev_pos
     current_time = rospy.Time.now()
@@ -65,23 +71,30 @@ def calculate_inertial_odometry(msg):
     odometry.pose.orientation.w = current_quat[3]
     return odometry
 
+# Callback function for the IMU data
 def imu_callback(msg):
     inertial_odometry = calculate_inertial_odometry(msg)
     if inertial_odometry is not None:
         # Publish the inertial odometry to a ROS topic
         inertial_odom_pub.publish(inertial_odometry)
 
+# Main entry point of the script
 if __name__ == '__main__':
+    # Initialize the ROS node with the name "inertial_odometry_node"
     rospy.init_node('inertial_odometry_node')
+
+    # Get the current time and initialize previous time, position, and velocity
     prev_time = rospy.Time.now()
     prev_pos = [0.0, 0.0, 0.0]
     prev_vel = [0.0, 0.0, 0.0]
-    # Assuming you have subscribed to the IMU topic
+
+    # Subscribe to the IMU topic ("/mavros/imu/data") and set the callback function to imu_callback
     imu_sub = rospy.Subscriber('/mavros/imu/data', Imu, imu_callback)
 
-    # Assuming you have created a publisher for the inertial odometry
+    # Create a publisher to publish the inertial odometry on the topic "/inertial_odom"
     inertial_odom_pub = rospy.Publisher('/inertial_odom', PoseStamped, queue_size=10)
 
     rate = rospy.Rate(20)  # 20 Hz update rate (adjust as needed)
 
+    # Enter the ROS spin loop to keep the node alive and continuously process incoming data
     rospy.spin()

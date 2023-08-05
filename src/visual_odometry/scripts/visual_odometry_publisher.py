@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# Import the necessary libraries and ROS message types
 import rospy
 import numpy as np
 import cv2
@@ -9,23 +10,31 @@ from sensor_msgs.msg import Image
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 
+# VisualOdometry class to handle visual odometry calculations
 class VisualOdometry():
-    
+    # Constructor to initialize the object with intrinsic camera matrix
     def __init__(self, intrinsic):
-        
+        # Store the intrinsic camera matrix and other matrices for projection
         self.K = intrinsic
         self.extrinsic = np.array(((1,0,0,0),(0,1,0,0),(0,0,1,0)))
         self.P = self.K @ self.extrinsic
+
+        # Initialize ORB feature detector
         self.orb = cv2.ORB_create(3000)
+
+        # Initialize FLANN matcher for feature matching
         FLANN_INDEX_LSH = 6
         index_params = dict(algorithm=FLANN_INDEX_LSH, table_number=6, key_size=12, multi_probe_level=1)
         search_params = dict(checks=50)
         self.flann = cv2.FlannBasedMatcher(indexParams=index_params, searchParams=search_params)
         
+        # List to store world points (3D points) from triangulation
         self.world_points = []
 
+        # Current pose matrix, starts as identity
         self.current_pose = None
 
+    # Static method to form a transformation matrix from rotation matrix and translation vector
     @staticmethod
     def _form_transf(R, t):
         
@@ -35,16 +44,18 @@ class VisualOdometry():
         
         return T
 
+    # Function to get feature matches between two images and return corresponding points
     def get_matches(self, img1, img2):
    
-        # Find the keypoints and descriptors with ORB
+        # Find keypoints and descriptors with ORB
         kp1, des1 = self.orb.detectAndCompute(img1, None)
         kp2, des2 = self.orb.detectAndCompute(img2, None)
-        # Find matches
+
+        # Find matches using FLANN matcher
         if len(kp1) > 6 and len(kp2) > 6:
             matches = self.flann.knnMatch(des1, des2, k=2)
 
-            # Find the matches there do not have a to high distance
+            # Get good matches based on Lowe's ratio test
             good_matches = []
             try:
                 for m, n in matches:
@@ -53,10 +64,7 @@ class VisualOdometry():
             except ValueError:
                 pass
             
-            # Draw matches
-            img_matches = np.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1] + img2.shape[1], 3), dtype=np.uint8)
-            
-            # Get the image points form the good matches
+            # Get image points from good matches
             q1 = np.float32([kp1[m.queryIdx].pt for m in good_matches])
             q2 = np.float32([kp2[m.trainIdx].pt for m in good_matches])
         
@@ -64,20 +72,21 @@ class VisualOdometry():
         else:
             return None, None
 
+    # Function to estimate pose from two sets of corresponding image points using Essential matrix
     def get_pose(self, q1, q2):
     
-        # Essential matrix
+        # Find Essential matrix E
         E, mask = cv2.findEssentialMat(q1, q2, self.K)
 
         # Decompose the Essential matrix into R and t
         R, t = self.decomp_essential_mat(E, q1, q2)
 
-        # Get transformation matrix
+        # Get transformation matrix from R and t
         transformation_matrix = self._form_transf(R, np.squeeze(t))
         
         return transformation_matrix
 
-
+    # Function to decompose Essential matrix into R and t by triangulation
     def decomp_essential_mat(self, E, q1, q2):
         def sum_z_cal_relative_scale(R, t):
             # Get the transformation matrix
@@ -143,6 +152,7 @@ class VisualOdometry():
 
         return [R1, t]
 
+# Function to convert a rotation matrix to quaternion
 def matrix_to_quaternion(matrix):
     rvec, _ = cv2.Rodrigues(matrix[:3, :3])
     qx = np.sin(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) - np.cos(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
@@ -151,12 +161,14 @@ def matrix_to_quaternion(matrix):
     qw = np.cos(rvec[0]/2) * np.cos(rvec[1]/2) * np.cos(rvec[2]/2) + np.sin(rvec[0]/2) * np.sin(rvec[1]/2) * np.sin(rvec[2]/2)
     return np.array([qx, qy, qz, qw])
 
+# Function to undistort an image using camera_matrix and distortion coefficients
 def undistort_image(image, camera_matrix, dist_coeffs):
     h, w = image.shape[:2]
     new_cam_mat, roi= cv2.getOptimalNewCameraMatrix(camera_matrix, dist_coeffs,(w,h),1,(w,h))
     undistorted_image = cv2.undistort(image,camera_matrix,dist_coeffs,None,new_cam_mat)
     return undistorted_image
 
+# Callback function for processing images and estimating odometry
 def image_callback(new_image):
     global vo_pub
     global vo
@@ -176,7 +188,7 @@ def image_callback(new_image):
         if q1 is not None:
             if (len(q1) > 20 and len(q2) > 20) and (q1.all() == q2.all()):
                 transf = vo.get_pose(q1, q2)
-                #cur_pose = np.dot(cur_pose,transf)
+                #cur_pose = np.dot(cur_pose,transf)  # Uncomment this line to get absolute position
                 odometry.header = Header()
                 odometry.header.stamp = rospy.get_rostime()
                 odometry.header.frame_id = "odom"
@@ -193,14 +205,20 @@ def image_callback(new_image):
     old_frame = new_frame
     process_frames = True
 
+# Main function
 if __name__ == "__main__":
+    # Read camera intrinsic and distortion parameters
     intrinsic = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/camera_matrix_r.npy')
     distortion = np.load('/home/ubuntu/Project_drone/src/visual_odometry/scripts/dist_coeffs_r.npy')
-    #intrinsic = np.load('/home/zeelpatel/Desktop/camera_matrix_r.npy')
-    #distortion = np.load('/home/zeelpatel/Desktop/dist_coeffs_r.npy')
+
+    # Initialize VisualOdometry object with intrinsic camera matrix
     vo = VisualOdometry(intrinsic)
+
+    # Initialize ROS node and publisher
     rospy.init_node("visual_odometry_node")
     vo_pub = rospy.Publisher("drone/visual_odometry", Odometry, queue_size=10)
+
+    # Subscribe to the camera topic
     image_sub = rospy.Subscriber("drone/camera/image", Image, image_callback)
     bridge = CvBridge()
     process_frames = False
@@ -208,5 +226,7 @@ if __name__ == "__main__":
     new_frame = None
     cur_pose = np.identity(4)
     odometry = Odometry()
+
+    # Keep the node running until interrupted
     while not rospy.is_shutdown():
         rospy.spin()
