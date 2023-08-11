@@ -3,7 +3,7 @@
 	<include file="$(find camera)/launch/camera.launch"/>	
 	<include file="$(find mavros)/launch/px4.launch"/>
 	<include file="$(find visual_odometry)/launch/visual_odometry.launch"/>
-	<include file="$(find aruco)/launch/launch_aruco_tracking.launch"/>
+	<include file="$(find aruco)/launch/aruco_tracking.launch"/>
 	<include file="$(find sonic_sensor)/launch/sonic_sensor.launch"/>
 	<include file="$(find odometry)/launch/start_filter.launch"/>
 	<include file="$(find remap)/launch/remap.launch"/>

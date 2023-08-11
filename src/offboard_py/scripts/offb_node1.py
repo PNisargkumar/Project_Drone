@@ -59,7 +59,10 @@ if __name__ == "__main__":
     pose.pose.position.x = 0
     pose.pose.position.y = 0
     pose.pose.position.z = 0.5
-
+    pose.pose.orientation.w = 1
+    pose.pose.orientation.x = 0
+    pose.pose.orientation.y = 0
+    pose.pose.orientation.z = 0
     # Send a few setpoints before starting to ensure the drone receives them
     for i in range(100):
         if rospy.is_shutdown():
